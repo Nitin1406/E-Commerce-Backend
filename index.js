@@ -38,7 +38,7 @@ async function init(){
             name:"Nitin",
             userId:"admin",
             email:"nit8948@gmail.com",
-            userType:"Admin",
+            userType:"ADMIN",
             password: bcrypt.hashSync("Welcome1",8)
         })
         console.log("Admin created ",user);
@@ -49,6 +49,10 @@ async function init(){
 }
 
 init();
+
+const path=require("./routers/auth.route");
+
+app.use("/ecomm/api/v1",path);
 
 app.listen(PORT,()=>{
     console.log(`Server is running at Port no : ${PORT}`)
