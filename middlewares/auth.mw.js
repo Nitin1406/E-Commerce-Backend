@@ -1,6 +1,8 @@
 
 const User=require("../models/user.model");
-const verifySignUpbody= async (req,res, next)=>{
+const jwt= require('jsonwebtoken')
+require("dotenv").config()
+exports.verifySignUpbody= async (req,res, next)=>{
 
     try{
 
@@ -52,4 +54,75 @@ const verifySignUpbody= async (req,res, next)=>{
     }
 }
 
-module.exports=verifySignUpbody;
+exports.verifyLoginBody= async (req,res,next)=>{
+    
+    if(!req.body.userId && !req.body.password){
+        return res.status(400).json({
+            success:false,
+            message:"Please provide userId and Password!!!"
+        })
+    }
+    if(!req.body.userId){
+        return res.status(400).json({
+            success:false,
+            message:"Please provide userId carefully"
+        })
+    }
+
+    if(!req.body.password){
+        return res.status(400).json({
+            success:false,
+            message:"Please provide password carefully"
+        })
+    }
+
+    next();
+}
+
+exports.verifyToken= async (req, res, next)=>{
+
+    const token= req.headers['x-access-token'];
+
+    if(!token){
+        return res.status(403).json({
+            success:false,
+            message:"No token is found : UnAuthorized"
+        })
+    }
+
+    jwt.verify(token, process.env.SECRET, async (err, decoded)=>{
+        if(err){
+            return res.status(401).json({
+                success:false,
+                message:"Token UnAuthorized"
+            })
+        }
+
+        const user= await User.findOne({userId : decoded.id});
+
+        if(!user){
+            return res.status(401).json({
+                message:"UnAuthorized, this user for this token doesn't exists"
+            })
+        }
+        req.user=user;
+        next();
+    })
+
+    
+}
+
+exports.isAdmin= async (req, res, next)=>{
+
+    const user = req.user;
+
+    if(user && user.userType =="ADMIN"){
+        next();
+    }else{
+        return res.status(400).json({
+            success:false,
+            message:"Only ADMINs are allowed to add new Category"
+        })
+    }
+    
+}
