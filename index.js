@@ -26,7 +26,7 @@ async function init(){
         if(user){
         console.log("Admin is already present");
         return 
-    }
+        }
     }
     catch(err){
         console.log("Error while reading the data",err);
@@ -34,7 +34,7 @@ async function init(){
     
 
     try{
-        user= await User.create({
+        user = await User.create({
             name:"Nitin",
             userId:"admin",
             email:"nit8948@gmail.com",

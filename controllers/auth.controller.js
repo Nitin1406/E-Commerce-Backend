@@ -1,5 +1,7 @@
 const User=require("../models/user.model");
 const bcrypt=require("bcryptjs");
+const jwt=require("jsonwebtoken");
+require("dotenv").config();
 
 exports.signup= async (req,res)=>{
 
@@ -29,4 +31,37 @@ exports.signup= async (req,res)=>{
             message:"Some error happened while registering the user"
         })
     }
+};
+
+
+exports.login= async (req,res) =>{
+
+    const user = await User.findOne({userId:req.body.userId});
+
+    if(!user){
+        return res.status(400).json({
+            success:false,
+            message:"User not registered"
+        })
+    }
+
+    const isPasswordValid= await bcrypt.compareSync(req.body.password,user.password);
+
+    if(!isPasswordValid){
+        return res.status(401).json({
+            success:false,
+            message:"Password is wrong"
+        })
+    }
+
+
+    const token= jwt.sign({id:user.userId},process.env.SECRET,{expiresIn:120})
+
+    return res.status(200).json({
+        name:user.name,
+        userId:user.userId,
+        email: user.email,
+        userType: user.userType,
+        accessToken: token
+    })
 }
